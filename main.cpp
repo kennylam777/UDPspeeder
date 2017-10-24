@@ -791,6 +791,16 @@ int server_event_loop()
 							continue;
 						}
 
+						if ( (he = gethostbyname(remote_host) ) == NULL ) {
+							mylog(log_warn,"Unable to resolve hostname: %s, remote ip wasn't updated.\n",remote_host);
+						} else {
+							struct in_addr **addr_list = (struct in_addr **)he->h_addr_list;
+							if ((*addr_list[0]).s_addr!=remote_ip_uint32) {
+								remote_ip_uint32=(*addr_list[0]).s_addr;
+								mylog(log_info,"Updated remote ip '%s' as resolved result of '%s'\n",my_ntoa(remote_ip_uint32),remote_host);	
+							}
+						}
+
 						int new_udp_fd;
 						ret=new_connected_socket(new_udp_fd,remote_ip_uint32,remote_port);
 
