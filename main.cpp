@@ -791,6 +791,7 @@ int server_event_loop()
 							continue;
 						}
 
+						struct hostent        *he;
 						if ( (he = gethostbyname(remote_host) ) == NULL ) {
 							mylog(log_warn,"Unable to resolve hostname: %s, remote ip wasn't updated.\n",remote_host);
 						} else {
