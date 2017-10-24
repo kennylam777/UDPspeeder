@@ -47,7 +47,7 @@ int output_interval_max=0*1000;
 int fix_latency=0;
 
 u32_t local_ip_uint32,remote_ip_uint32=0;
-char local_ip[100], remote_ip[100];
+char local_ip[100], remote_host[100];
 int local_port = -1, remote_port = -1;
 
 //u64_t last_report_time=0;
@@ -1166,7 +1166,7 @@ void print_help()
 	printf("\n");
 	printf("usage:\n");
 	printf("    run as client : ./this_program -c -l local_listen_ip:local_port -r server_ip:server_port  [options]\n");
-	printf("    run as server : ./this_program -s -l server_listen_ip:server_port -r remote_ip:remote_port  [options]\n");
+	printf("    run as server : ./this_program -s -l server_listen_ip:server_port -r remote_host:remote_port  [options]\n");
 	printf("\n");
 	printf("common option,must be same on both sides:\n");
 	printf("    -k,--key              <string>        key for simple xor encryption. if not set,xor is disabled\n");
@@ -1412,14 +1412,14 @@ void process_arg(int argc, char *argv[])
 			{
 				//printf("in :\n");
 				//printf("%s\n",optarg);
-				sscanf(optarg, "%[^:]:%d", remote_ip, &remote_port);
+				sscanf(optarg, "%[^:]:%d", remote_host, &remote_port);
 				//printf("%d\n",remote_port);
 			}
 			else
 			{
 				mylog(log_fatal," -r ip:port\n");
 				myexit(1);
-				strcpy(remote_ip, "127.0.0.1");
+				strcpy(remote_host, "127.0.0.1");
 				sscanf(optarg, "%d", &remote_port);
 			}
 			break;
@@ -1616,7 +1616,15 @@ int main(int argc, char *argv[])
 
 	delay_manager.set_capacity(delay_capacity);
 	local_ip_uint32=inet_addr(local_ip);
-	remote_ip_uint32=inet_addr(remote_ip);
+	
+	struct hostent        *he;
+	if ( (he = gethostbyname(remote_host) ) == NULL ) {
+		mylog(log_error,"Unable to resolve hostname: %s\n",remote_host);
+		exit(1); /* error */
+	}
+	struct in_addr **addr_list = (struct in_addr **)he->h_addr_list;
+	remote_ip_uint32=(*addr_list[0]).s_addr;
+	mylog(log_info,"%s ip = %s\n", program_mode==client_mode?"server":"remote", my_ntoa(remote_ip_uint32));
 
 	if(program_mode==client_mode)
 	{
