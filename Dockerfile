@@ -1,10 +1,11 @@
 FROM alpine:3.6 as builder
 
 WORKDIR /
+RUN apk add --no-cache git  build-base linux-headers
 
 COPY . udpspeeder
-RUN apk add --no-cache git  build-base linux-headers && \
- cd udpspeeder && \
+
+RUN cd udpspeeder && \
  make all
 
 FROM alpine:3.6
