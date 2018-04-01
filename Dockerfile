@@ -10,5 +10,5 @@ RUN cd udpspeeder && \
 
 FROM alpine:3.6
 RUN apk add --no-cache libstdc++ iptables
-COPY --from=builder /udpspeeder/udpspeeder_all /bin/udpspeeder
+COPY --from=builder /udpspeeder/speederv2 /bin/speederv2
 ENTRYPOINT [ "/bin/udpspeeder" ]
